@@ -35,20 +35,22 @@ def scheduling(request):
         interview_sch={"fullname":fullname,"job_code":job_code,"apply_position":apply_position,"description":description,
                         "interview_date":date_time_obj,"time_slot":time_slot}
         obj_candidate=SchedulingMaster.objects.create(**interview_sch)
-        concat_id = "can_"+ str(obj_candidate.id) + interview_date
+        concat_id =str(obj_candidate.id) + interview_date[:2]
         unique_id=encrypt_data(concat_id)
-        obj_candidate.candidate_id = unique_id
+        obj_candidate.candidate_id = "can_" + str(unique_id)
         obj_candidate.save()
-        return  ok_response(message="candidate register successfully")
+        mydict={"Candidate_unique_id":obj_candidate.candidate_id}
+        return  ok_response(data=mydict,message="candidate register successfully")
     elif relavent_to == "interviewer":
         interview_sch = {"interviwer_name": fullname,
                          "available_date": date_time_obj, "time_slot": time_slot, "position": position}
         obj_interviewr = InterviewrMaster.objects.create(**interview_sch)
-        concat_id = "inter_" + str(obj_interviewr.id) + interview_date
+        concat_id = str(obj_interviewr.id) + interview_date[:2]
         unique_id=encrypt_data(concat_id)
-        obj_interviewr.interviwer_id = unique_id
+        obj_interviewr.interviwer_id =  "Inter_" + str(unique_id)
         obj_interviewr.save()
-        return ok_response(message="interviewr register successfully")
+        mydict={"Interviwer_unique_id":obj_interviewr.interviwer_id}
+        return ok_response(data=mydict,message="interviewr register successfully")
 
     else:
         return error_response(code=406,message="relavent is missmatch")
@@ -115,5 +117,4 @@ def get_slots(hours, appointments,check_scheduling, duration=timedelta(hours=1))
         for can_name,time_slot in zip(check_scheduling,demolist):
             time_slot["candidate_id"] = can_name.candidate_id
             time_slot["candidate_name"] =can_name.fullname
-
         return demolist
